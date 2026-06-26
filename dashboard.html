@@ -779,8 +779,8 @@ const STORAGE_KEY = "financeTrackerEntries";
           <td class="${amountClass}">${amountPrefix}${formatCurrency(item.amount)}</td>
           <td>
             <div class="action-buttons">
-              <button class="icon-btn btn-edit" data-id="${item.id}" title="Edit">Edit</button>
-              <button class="icon-btn btn-delete" data-id="${item.id}" title="Delete">Delete</button>
+              <button class="icon-btn btn-edit" data-id="${item.entry_id}" title="Edit">Edit</button>
+              <button class="icon-btn btn-delete" data-id="${item.entry_id}" title="Delete">Delete</button>
             </div>
           </td>
         `;
@@ -812,7 +812,7 @@ form.addEventListener("submit", async (e) => {
         return;
       }
 
-      const newEntry = { id: Date.now().toString(), type, amount, category, description, date };
+     const data = await response.json();
 
       // Try API first, fallback to localStorage
       if (isServerOnline) {
@@ -880,7 +880,7 @@ if (target.classList.contains("btn-delete")) {
         }
 
         // Fallback to localStorage
-        entries = entries.filter(item => item.id !== id);
+        entries = entries.filter(item => item.entry_id !== id);
         saveEntries();
         render();
 
@@ -888,7 +888,7 @@ if (target.classList.contains("btn-delete")) {
       }
 
       if (target.classList.contains("btn-edit")) {
-        const entry = entries.find(item => item.id === id);
+        const entry = entries.find(item => item.entry_id === id);
         if (!entry) return;
 
         const currentCategories = entry.type === "income" ? incomeCategories : expenseCategories;
@@ -955,7 +955,9 @@ if (!formValues) {
               body: JSON.stringify(formValues)
             });
             if (response.ok) {
-              entries = entries.map(item => item.id === id ? { ...item, ...formValues } : item);
+              entries = entries.map(item =>
+    item.entry_id === id ? { ...item, ...formValues } : item
+);
               saveEntries();
               render();
               await Swal.fire({ icon: "success", title: "Updated", text: "Transaction updated on server.", timer: 1400, showConfirmButton: false });
@@ -967,7 +969,9 @@ if (!formValues) {
         }
 
         // Fallback to localStorage
-        entries = entries.map(item => item.id === id ? { ...item, ...formValues } : item);
+        entries = entries.map(item =>
+    item.entry_id === id ? { ...item, ...formValues } : item
+);
         saveEntries();
         render();
 
