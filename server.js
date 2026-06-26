@@ -18,7 +18,12 @@ const pool = new Pool({
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://fintrack-beta-lyart.vercel.app",
+    "https://fintrack-44nvq7l36-einzberns-projects.vercel.app"
+  ]
+}));
 app.use(express.json());
 app.use(express.static(__dirname));
 
