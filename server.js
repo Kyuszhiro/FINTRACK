@@ -223,6 +223,22 @@ app.delete('/api/entries/:id', async (req, res) => {
     }
 });
 
+app.get('/api/test-db', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT NOW()');
+        res.json({
+            success: true,
+            now: result.rows[0]
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
 // Serve static files
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
