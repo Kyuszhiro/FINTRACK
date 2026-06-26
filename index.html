@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance Tracker - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      -moz-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      padding-left: max(20px, env(safe-area-inset-left));
+      padding-right: max(20px, env(safe-area-inset-right));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 430px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .brand {
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .brand h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      margin-bottom: 6px;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .form-grid { display: grid; gap: 13px; }
+
+    label {
+      display: block;
+      font-size: 0.84rem;
+      color: #4b5563;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 11px 12px;
+      font-size: 16px;
+      outline: none;
+      color: var(--text);
+      background: #fff;
+      min-height: 48px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+
+    input:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    @media screen and (-webkit-min-device-pixel-ratio: 0) {
+      input:focus { font-size: 16px; }
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .toggle-pass {
+      position: absolute;
+      right: 10px;
+      top: 36px;
+      border: none;
+      background: transparent;
+      color: #6b7280;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      padding: 8px 12px;
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (hover: hover) {
+      .toggle-pass:hover {
+        background: #f3f4f6;
+        border-radius: 8px;
+      }
+    }
+
+    .btn-login {
+      margin-top: 2px;
+      border: none;
+      background: var(--primary);
+      color: #fff;
+      width: 100%;
+      border-radius: 10px;
+      padding: 14px 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      min-height: 48px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-login:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-login:active {
+      background: #1e40af;
+      transform: scale(0.98);
+    }
+
+    .btn-login:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .error-msg {
+      margin-top: 12px;
+      border: 1px solid #fecaca;
+      background: #fef2f2;
+      color: var(--danger);
+      font-size: 0.86rem;
+      border-radius: 10px;
+      padding: 10px 11px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+
+    .hint {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .status {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .status.online {
+      color: #059669;
+    }
+
+    .status.offline {
+      color: #dc2626;
+    }
+
+    @media (max-width: 480px) {
+      .login-card { padding: 22px 16px; }
+    }
+
+    @media (max-width: 380px) {
+      body { padding: 16px; }
+      .login-card { padding: 18px 14px; }
+      .brand h1 { font-size: 1.35rem; }
+      .brand p { font-size: 0.85rem; }
+      input { padding: 12px 10px; font-size: 16px; }
+      .btn-login { padding: 14px 12px; font-size: 0.95rem; }
+    }
+
+    @media (max-width: 320px) {
+      body { padding: 12px; }
+      .login-card { padding: 14px 12px; }
+      .brand h1 { font-size: 1.25rem; }
+      .brand p { font-size: 0.8rem; }
+      .hint { font-size: 0.75rem; }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      body {
+        padding: 12px;
+        min-height: 100vh;
+      }
+      .login-card {
+        padding: 14px;
+        max-width: 380px;
+      }
+      .brand { margin-bottom: 10px; }
+      .brand h1 { font-size: 1.2rem; margin-bottom: 2px; }
+      .brand p { font-size: 0.75rem; }
+      .form-grid { gap: 8px; }
+      input { padding: 8px 10px; }
+      .btn-login { padding: 10px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="brand">
+      <h1>Finance Tracker</h1>
+      <p>Secure sign in to your finance dashboard</p>
+    </div>
+
+    <p class="status online" id="serverStatus">● Server Connected</p>
+
+    <form id="loginForm" class="form-grid">
+      <div>
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter username" autocomplete="username" required>
+      </div>
+
+      <div class="password-wrap">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+        <button type="button" class="toggle-pass" onclick="togglePassword()">SHOW</button>
+      </div>
+
+      <button type="submit" class="btn-login" id="loginBtn">Login</button>
+
+      <div class="error-msg" id="errorMsg">
+        Invalid username or password. Please try again.
+      </div>
+    </form>
+
+    <p class="hint">Want an account? contact <strong>Kurth Novesteras</strong></p>
+  </div>
+
+  <script>
+    // API Base URL - change this to your deployed server URL
+    const API_URL = window.location.origin;
+
+    function togglePassword() {
+      const passwordInput = document.getElementById("password");
+      const toggleBtn = document.querySelector(".toggle-pass");
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleBtn.textContent = "HIDE";
+      } else {
+        passwordInput.type = "password";
+        toggleBtn.textContent = "SHOW";
+      }
+    }
+
+    const loginForm = document.getElementById("loginForm");
+    const errorMsg = document.getElementById("errorMsg");
+    const loginBtn = document.getElementById("loginBtn");
+    const serverStatus = document.getElementById("serverStatus");
+
+    // Check server status
+    async function checkServerStatus() {
+      try {
+        const response = await fetch(API_URL + '/api/entries', { method: 'GET' });
+        if (response.ok) {
+          serverStatus.textContent = '● Server Connected';
+          serverStatus.className = 'status online';
+        } else {
+          throw new Error('Server error');
+        }
+      } catch (error) {
+        serverStatus.textContent = '● Server Offline (Using Local Mode)';
+        serverStatus.className = 'status offline';
+      }
+    }
+
+    loginForm.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Logging in...';
+      errorMsg.classList.remove("show");
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      try {
+        // Try API login first
+        const response = await fetch(API_URL + '/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Store auth data
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("username", username);
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("loginTime", Date.now().toString());
+          localStorage.setItem("useBackend", "true");
+          
+          window.location.href = "dashboard.html";
+        } else {
+          errorMsg.textContent = data.message || "Invalid username or password. Please try again.";
+          errorMsg.classList.add("show");
+        }
+      } catch (error) {
+        // Fallback to local storage login if API is unavailable
+        console.log('API unavailable, using local login');
+        
+        const validUsers = {
+          Kurth: "Einzbern"
+        };
+
+        if (validUsers[username] && validUsers[username] === password) {
+          localStorage.setItem("isLoggedIn", "true");
+          localStorage.setItem("username", username);
+          localStorage.setItem("loginTime", Date.now().toString());
+          localStorage.setItem("useBackend", "false");
+          
+          window.location.href = "dashboard.html";
+        } else {
+          errorMsg.classList.add("show");
+        }
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      }
+    });
+
+    document.getElementById("username").addEventListener("input", () => errorMsg.classList.remove("show"));
+    document.getElementById("password").addEventListener("input", () => errorMsg.classList.remove("show"));
+
+    if (localStorage.getItem("isLoggedIn") === "true") {
+      window.location.href = "dashboard.html";
+    }
+
+    // Check server status on load
+    checkServerStatus();
+  </script>
+</body>
+</html>

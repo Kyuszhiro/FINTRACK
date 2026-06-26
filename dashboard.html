@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finance Tracker - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --radius: 12px;
+    }
+
+* {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.45;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+.topbar {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+    }
+
+    .brand h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .brand p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 2px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+.pill {
+      background: #eef2ff;
+      color: #3730a3;
+      border: 1px solid #c7d2fe;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 0.83rem;
+      font-weight: 600;
+    }
+
+    .status {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status.online {
+      color: #059669;
+    }
+
+    .status.offline {
+      color: #dc2626;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 10px;
+      padding: 9px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn.secondary {
+      background: #ffffff;
+      color: #111827;
+      border-color: var(--line);
+    }
+
+    .btn.secondary:hover {
+      background: #f9fafb;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .card h2 {
+      font-size: 1.03rem;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      font-size: 0.92rem;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fff;
+    }
+
+.metric .label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .metric .value {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      text-align: center;
+    }
+
+    .metric.income .value { color: var(--success); }
+    .metric.expense .value { color: var(--danger); }
+    .metric.balance .value { color: var(--primary); }
+    .metric.count .value { color: var(--warning); }
+
+.toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      justify-content: center;
+    }
+
+.date-range {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: end;
+    }
+
+    .date-range label {
+      text-align: center;
+    }
+
+    .date-range > div {
+      text-align: center;
+    }
+
+    .filter-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #111827;
+      border-radius: 9px;
+      padding: 8px 11px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+      color: #1e3a8a;
+    }
+
+.table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: #fff;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+
+    /* Custom scrollbar styling for the table */
+    .table-wrap::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+
+    .table-wrap::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    .table-wrap::-webkit-scrollbar-thumb:hover {
+      background: #a1a1a1;
+    }
+
+    /* Firefox scrollbar styling */
+    .table-wrap {
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+
+    /* Scroll indicator for mobile - shows users there's more content */
+    .scroll-indicator {
+      display: none;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      pointer-events: none;
+      z-index: 5;
+      animation: fadeInOut 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+th, td {
+      text-align: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.2px;
+    }
+
+    tbody tr:hover {
+      background: #fcfcfd;
+    }
+
+    .type-tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      text-transform: capitalize;
+    }
+
+    .type-income {
+      background: #ecfdf5;
+      color: #047857;
+      border-color: #a7f3d0;
+    }
+
+    .type-expense {
+      background: #fef2f2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .amount-income { color: #047857; font-weight: 700; }
+    .amount-expense { color: #b91c1c; font-weight: 700; }
+
+.action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .icon-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 5px 8px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .icon-btn:hover {
+      background: #f3f4f6;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 26px 16px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+@media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      .summary { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .summary { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .card { padding: 15px; }
+      .topbar { padding: 14px 16px; }
+      .brand h1 { font-size: 1.2rem; }
+    }
+
+    @media (max-width: 760px) {
+      .date-range { grid-template-columns: 1fr; }
+      .toolbar { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+      .toolbar .filter-btn { flex: 0 0 auto; white-space: nowrap; min-height: 44px; padding: 10px 14px; }
+    }
+
+@media (max-width: 640px) {
+      .app { padding: 12px; }
+      .topbar { padding: 12px 16px; flex-direction: row; align-items: center; }
+      .topbar-left { flex: 1; display: flex; align-items: center; gap: 10px; }
+      .brand h1 { font-size: 1.1rem; }
+      .brand p { font-size: 0.78rem; display: none; }
+      .mobile-menu-btn { display: flex; flex-direction: column; gap: 4px; padding: 8px; background: none; border: none; cursor: pointer; min-width: 44px; min-height: 44px; }
+      .mobile-menu-btn span { display: block; width: 22px; height: 2.5px; background: #1f2937; border-radius: 2px; transition: all 0.3s ease; }
+      .mobile-menu-btn.active span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+      .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
+      .mobile-menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+      .topbar-actions { display: none; flex-direction: column; width: 100%; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid var(--line); border-radius: 0 0 var(--radius) var(--radius); padding: 12px; box-shadow: var(--shadow); gap: 10px; }
+      .topbar-actions.open { display: flex; }
+      .pill { width: 100%; text-align: center; font-size: 0.86rem; padding: 10px 12px; }
+      .btn { width: 100%; min-height: 44px; font-size: 0.92rem; }
+      .summary { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .metric { padding: 12px 14px; }
+      .metric .value { font-size: 1.05rem; }
+      .card { padding: 14px; }
+      .toolbar { gap: 6px; margin-bottom: 10px; }
+      .date-range { gap: 10px; }
+      .date-range > div { width: 100%; }
+      .date-range .btn { width: 100%; }
+      .table-wrap { border-radius: 10px; -webkit-overflow-scrolling: touch; }
+      table { min-width: 680px; }
+      th, td { font-size: 0.8rem; padding: 10px 9px; white-space: nowrap; }
+      .action-buttons { flex-direction: row; gap: 5px; }
+      .action-buttons .icon-btn { min-width: 48px; min-height: 38px; font-size: 0.76rem; }
+      .form-grid { gap: 14px; }
+      .form-grid > div { width: 100%; }
+      label { font-size: 0.82rem; }
+      input, select { min-height: 44px; font-size: 0.94rem; padding: 10px 12px; }
+    }
+
+    @media (max-width: 420px) {
+      .brand h1 { font-size: 1rem; }
+      .topbar { padding: 10px 12px; }
+      .topbar-actions, .topbar-actions.open { padding: 10px; }
+      .card { padding: 12px; }
+      .card h2 { font-size: 0.95rem; }
+      .summary { grid-template-columns: 1fr; gap: 8px; }
+      .metric { padding: 11px 12px; }
+      .metric .label { font-size: 0.76rem; }
+      .metric .value { font-size: 1rem; }
+      input, select { min-height: 42px; font-size: 0.9rem; }
+      .btn { font-size: 0.88rem; }
+      .toolbar .filter-btn { flex: 1 1 calc(50% - 4px); font-size: 0.8rem; }
+      table { min-width: 600px; }
+      th, td { font-size: 0.76rem; padding: 8px 7px; }
+      .action-buttons .icon-btn { min-width: 42px; min-height: 34px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+<header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="brand">
+          <h1>Finance Tracker Dashboard</h1>
+          <p>Simple and professional income & expense management</p>
+        </div>
+      </div>
+<div class="topbar-actions">
+        <span class="status" id="serverStatus"></span>
+        <span class="pill" id="welcomeUser">User</span>
+        <button class="btn" id="btnLogout">Logout</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card">
+        <h2>Add Transaction</h2>
+        <form id="transactionForm" class="form-grid">
+          <div>
+            <label for="entryType">Type</label>
+            <select id="entryType" required>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="entryAmount">Amount</label>
+            <input id="entryAmount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+          </div>
+
+          <div>
+            <label for="entryCategory">Category</label>
+            <select id="entryCategory" required></select>
+          </div>
+
+          <div>
+            <label for="entryDescription">Description</label>
+            <input id="entryDescription" type="text" placeholder="Optional note" />
+          </div>
+
+          <div>
+            <label for="entryDate">Date</label>
+            <input id="entryDate" type="date" required />
+          </div>
+
+<div style="text-align: center;">
+            <button type="submit" class="btn">Add Entry</button>
+          </div>
+        </form>
+
+        <p class="footer-note">
+          Data is stored in your browser (localStorage), suitable for static hosting.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Overview</h2>
+
+        <div class="summary">
+          <div class="metric income">
+            <div class="label">Total Income</div>
+            <div class="value" id="totalIncome">₱0.00</div>
+          </div>
+          <div class="metric expense">
+            <div class="label">Total Expense</div>
+            <div class="value" id="totalExpense">₱0.00</div>
+          </div>
+          <div class="metric balance">
+            <div class="label">Net Balance</div>
+            <div class="value" id="netBalance">₱0.00</div>
+          </div>
+          <div class="metric count">
+            <div class="label">Entries</div>
+            <div class="value" id="entryCount">0</div>
+          </div>
+        </div>
+
+        <div class="toolbar" id="filterToolbar">
+          <button class="filter-btn active" data-filter="daily">Daily</button>
+          <button class="filter-btn" data-filter="weekly">Weekly</button>
+          <button class="filter-btn" data-filter="monthly">Monthly</button>
+          <button class="filter-btn" data-filter="yearly">Yearly</button>
+          <button class="filter-btn" data-filter="all">All</button>
+        </div>
+
+        <div class="date-range">
+          <div>
+            <label for="dateFrom">Date From</label>
+            <input type="date" id="dateFrom">
+          </div>
+          <div>
+            <label for="dateTo">Date To</label>
+            <input type="date" id="dateTo">
+          </div>
+          <button class="btn secondary" id="btnApplyDateRange" type="button">Apply Range</button>
+          <button class="btn secondary" id="btnResetDateRange" type="button">Reset Range</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="entriesTableBody"></tbody>
+          </table>
+          <div id="emptyState" class="empty">No transactions yet for this filter.</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function initAuth() {
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      if (!isLoggedIn) {
+        window.location.href = "index.html";
+        return;
+      }
+      const username = localStorage.getItem("username") || "User";
+      document.getElementById("welcomeUser").textContent = username;
+    })();
+
+const STORAGE_KEY = "financeTrackerEntries";
+    const API_URL = window.location.origin;
+    let entries = [];
+    let isServerOnline = false;
+
+    // Check server status and load entries
+    async function loadEntries() {
+      try {
+        const response = await fetch(API_URL + '/api/entries', { method: 'GET' });
+        if (response.ok) {
+          const data = await response.json();
+          entries = data.entries || [];
+          isServerOnline = true;
+          updateServerStatus(true);
+        } else {
+          throw new Error('Server error');
+        }
+      } catch (error) {
+        console.log('API unavailable, loading from localStorage');
+        entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        isServerOnline = false;
+        updateServerStatus(false);
+      }
+      render();
+    }
+
+    function updateServerStatus(online) {
+      const statusEl = document.getElementById('serverStatus');
+      if (statusEl) {
+        if (online) {
+          statusEl.textContent = '● Server Connected';
+          statusEl.className = 'status online';
+        } else {
+          statusEl.textContent = '● Server Offline (Local Mode)';
+          statusEl.className = 'status offline';
+        }
+      }
+    }
+    let activeFilter = "daily";
+    let dateRangeFrom = "";
+    let dateRangeTo = "";
+    let weeklyStartDate = "";
+    let monthlyMonth = "";
+    let monthlyYear = "";
+    let yearlyYear = "";
+
+    const form = document.getElementById("transactionForm");
+    const inputType = document.getElementById("entryType");
+    const inputAmount = document.getElementById("entryAmount");
+    const inputCategory = document.getElementById("entryCategory");
+    const inputDescription = document.getElementById("entryDescription");
+    const inputDate = document.getElementById("entryDate");
+    const tableBody = document.getElementById("entriesTableBody");
+    const emptyState = document.getElementById("emptyState");
+
+    const dateFromInput = document.getElementById("dateFrom");
+    const dateToInput = document.getElementById("dateTo");
+    const btnApplyDateRange = document.getElementById("btnApplyDateRange");
+    const btnResetDateRange = document.getElementById("btnResetDateRange");
+
+    const totalIncomeEl = document.getElementById("totalIncome");
+    const totalExpenseEl = document.getElementById("totalExpense");
+    const netBalanceEl = document.getElementById("netBalance");
+    const entryCountEl = document.getElementById("entryCount");
+
+    const incomeCategories = ["Salary", "Freelance", "Gift"];
+    const expenseCategories = [
+      "Electric Bill", "Water Bill", "Internet Bill", "Groceries", "Parent Allowance", "Fuel",
+      "Lifestyle Spending", "Wants", "Clothing", "Vehicle Maintenance / Upgrade",
+      "Mobile Load", "Pets", "Gift", "Medical", "Loans", "Home Maintenance"
+    ];
+
+    function getCategoryListByType(type) {
+      return type === "income" ? incomeCategories : expenseCategories;
+    }
+
+    function populateCategoryOptions(selectedValue = "") {
+      const categories = getCategoryListByType(inputType.value);
+      inputCategory.innerHTML = categories.map(c => `<option value="${c}" ${selectedValue === c ? "selected" : ""}>${c}</option>`).join("");
+    }
+
+    const today = new Date();
+    inputDate.value = today.toISOString().slice(0, 10);
+    populateCategoryOptions();
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(value);
+    }
+
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    function isInCurrentPeriod(dateStr, filter) {
+      if (filter === "all") return true;
+      const date = new Date(dateStr + "T00:00:00");
+      const now = new Date();
+
+      if (filter === "daily") {
+        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+      }
+
+      if (filter === "weekly") {
+        if (!weeklyStartDate) return false;
+        const start = new Date(weeklyStartDate + "T00:00:00");
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+        return date >= start && date <= end;
+      }
+
+      if (filter === "monthly") {
+        if (!monthlyMonth || !monthlyYear) return false;
+        return date.getFullYear() === Number(monthlyYear) && (date.getMonth() + 1) === Number(monthlyMonth);
+      }
+
+      if (filter === "yearly") {
+        if (!yearlyYear) return false;
+        return date.getFullYear() === Number(yearlyYear);
+      }
+
+      return true;
+    }
+
+    function isInCustomDateRange(dateStr) {
+      if (!dateRangeFrom && !dateRangeTo) return true;
+      const entryDate = new Date(dateStr + "T00:00:00");
+      if (dateRangeFrom && entryDate < new Date(dateRangeFrom + "T00:00:00")) return false;
+      if (dateRangeTo && entryDate > new Date(dateRangeTo + "T23:59:59")) return false;
+      return true;
+    }
+
+    function getFilteredEntries() {
+      return entries
+        .filter(item => isInCurrentPeriod(item.date, activeFilter))
+        .filter(item => isInCustomDateRange(item.date))
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+
+    function renderSummary(filtered) {
+      const totalIncome = filtered.filter(e => e.type === "income").reduce((sum, e) => sum + e.amount, 0);
+      const totalExpense = filtered.filter(e => e.type === "expense").reduce((sum, e) => sum + e.amount, 0);
+      const netBalance = totalIncome - totalExpense;
+
+      totalIncomeEl.textContent = formatCurrency(totalIncome);
+      totalExpenseEl.textContent = formatCurrency(totalExpense);
+      netBalanceEl.textContent = formatCurrency(netBalance);
+      entryCountEl.textContent = String(filtered.length);
+    }
+
+    function renderTable(filtered) {
+      tableBody.innerHTML = "";
+      if (!filtered.length) {
+        emptyState.style.display = "block";
+        return;
+      }
+      emptyState.style.display = "none";
+
+      filtered.forEach(item => {
+        const tr = document.createElement("tr");
+        const amountClass = item.type === "income" ? "amount-income" : "amount-expense";
+        const amountPrefix = item.type === "income" ? "+" : "-";
+        const typeClass = item.type === "income" ? "type-income" : "type-expense";
+
+        tr.innerHTML = `
+          <td>${item.date}</td>
+          <td><span class="type-tag ${typeClass}">${item.type}</span></td>
+          <td>${item.category}</td>
+          <td>${item.description || "-"}</td>
+          <td class="${amountClass}">${amountPrefix}${formatCurrency(item.amount)}</td>
+          <td>
+            <div class="action-buttons">
+              <button class="icon-btn btn-edit" data-id="${item.id}" title="Edit">Edit</button>
+              <button class="icon-btn btn-delete" data-id="${item.id}" title="Delete">Delete</button>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function render() {
+      const filtered = getFilteredEntries();
+      renderSummary(filtered);
+      renderTable(filtered);
+    }
+
+    inputType.addEventListener("change", () => {
+      populateCategoryOptions();
+    });
+
+form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const type = inputType.value;
+      const amount = Number(inputAmount.value);
+      const category = inputCategory.value;
+      const description = inputDescription.value.trim();
+      const date = inputDate.value;
+
+      if (!amount || amount <= 0 || !category || !date) {
+        await Swal.fire({ icon: "warning", title: "Invalid Input", text: "Please provide valid amount, category, and date." });
+        return;
+      }
+
+      const newEntry = { id: Date.now().toString(), type, amount, category, description, date };
+
+      // Try API first, fallback to localStorage
+      if (isServerOnline) {
+        try {
+          const response = await fetch(API_URL + '/api/entries', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, amount, category, description, date })
+          });
+          if (response.ok) {
+            entries.push(newEntry);
+            saveEntries();
+            render();
+            inputAmount.value = "";
+            populateCategoryOptions();
+            inputDescription.value = "";
+            inputAmount.focus();
+            await Swal.fire({ icon: "success", title: "Entry Added", text: "Transaction added to server.", timer: 1500, showConfirmButton: false });
+            return;
+          }
+        } catch (error) {
+          console.log('API error, using local fallback');
+        }
+      }
+
+      // Fallback to localStorage
+      entries.push(newEntry);
+      saveEntries();
+      render();
+
+      inputAmount.value = "";
+      populateCategoryOptions();
+      inputDescription.value = "";
+      inputAmount.focus();
+
+      await Swal.fire({ icon: "success", title: "Entry Added", text: isServerOnline ? "Transaction added successfully." : "Transaction saved locally (offline).", timer: 1500, showConfirmButton: false });
+    });
+
+    tableBody.addEventListener("click", async (e) => {
+      const target = e.target;
+      const id = target.getAttribute("data-id");
+      if (!id) return;
+
+if (target.classList.contains("btn-delete")) {
+        const result = await Swal.fire({
+          icon: "warning", title: "Delete Transaction?", text: "This action cannot be undone.",
+          showCancelButton: true, confirmButtonText: "Yes, delete", cancelButtonText: "Cancel", confirmButtonColor: "#dc2626"
+        });
+        if (!result.isConfirmed) return;
+
+        // Try API first, fallback to localStorage
+        if (isServerOnline) {
+          try {
+            const response = await fetch(API_URL + '/api/entries/' + id, { method: 'DELETE' });
+            if (response.ok) {
+              entries = entries.filter(item => item.id !== id);
+              saveEntries();
+              render();
+              await Swal.fire({ icon: "success", title: "Deleted", text: "Transaction removed from server.", timer: 1400, showConfirmButton: false });
+              return;
+            }
+          } catch (error) {
+            console.log('API error, using local fallback');
+          }
+        }
+
+        // Fallback to localStorage
+        entries = entries.filter(item => item.id !== id);
+        saveEntries();
+        render();
+
+        await Swal.fire({ icon: "success", title: "Deleted", text: isServerOnline ? "Transaction removed successfully." : "Transaction removed locally.", timer: 1400, showConfirmButton: false });
+      }
+
+      if (target.classList.contains("btn-edit")) {
+        const entry = entries.find(item => item.id === id);
+        if (!entry) return;
+
+        const currentCategories = entry.type === "income" ? incomeCategories : expenseCategories;
+        const { value: formValues } = await Swal.fire({
+          title: "Edit Transaction",
+          html: `
+            <div style="display:grid;gap:10px;text-align:left;">
+              <label style="font-size:12px;color:#6b7280;">Type</label>
+              <select id="swalType" class="swal2-input" style="margin:0;">
+                <option value="income" ${entry.type === "income" ? "selected" : ""}>Income</option>
+                <option value="expense" ${entry.type === "expense" ? "selected" : ""}>Expense</option>
+              </select>
+              <label style="font-size:12px;color:#6b7280;">Amount</label>
+              <input id="swalAmount" class="swal2-input" type="number" min="0.01" step="0.01" value="${entry.amount}" style="margin:0;" />
+              <label style="font-size:12px;color:#6b7280;">Category</label>
+              <select id="swalCategory" class="swal2-input" style="margin:0;">
+                ${currentCategories.map(c => `<option value="${c}" ${entry.category === c ? "selected" : ""}>${c}</option>`).join("")}
+              </select>
+              <label style="font-size:12px;color:#6b7280;">Description</label>
+              <input id="swalDescription" class="swal2-input" type="text" value="${entry.description || ""}" style="margin:0;" />
+              <label style="font-size:12px;color:#6b7280;">Date</label>
+              <input id="swalDate" class="swal2-input" type="date" value="${entry.date}" style="margin:0;" />
+            </div>
+          `,
+          focusConfirm: false,
+          showCancelButton: true,
+          confirmButtonText: "Save Changes",
+          cancelButtonText: "Cancel",
+          didOpen: () => {
+            const swalType = document.getElementById("swalType");
+            const swalCategory = document.getElementById("swalCategory");
+            swalType.addEventListener("change", () => {
+              const options = getCategoryListByType(swalType.value);
+              swalCategory.innerHTML = options.map(c => `<option value="${c}">${c}</option>`).join("");
+            });
+          },
+          preConfirm: () => {
+            const updatedType = document.getElementById("swalType").value;
+            const updatedAmount = Number(document.getElementById("swalAmount").value);
+            const updatedCategory = document.getElementById("swalCategory").value;
+            const updatedDescription = document.getElementById("swalDescription").value.trim();
+            const updatedDate = document.getElementById("swalDate").value;
+
+            if (!updatedAmount || updatedAmount <= 0 || !updatedCategory || !updatedDate) {
+              Swal.showValidationMessage("Please fill valid amount, category, and date.");
+              return null;
+            }
+
+            return { type: updatedType, amount: updatedAmount, category: updatedCategory, description: updatedDescription, date: updatedDate };
+          }
+        });
+
+if (!formValues) {
+          await Swal.fire({ icon: "info", title: "Edit Cancelled", timer: 1000, showConfirmButton: false });
+          return;
+        }
+
+        // Try API first, fallback to localStorage
+        if (isServerOnline) {
+          try {
+            const response = await fetch(API_URL + '/api/entries/' + id, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formValues)
+            });
+            if (response.ok) {
+              entries = entries.map(item => item.id === id ? { ...item, ...formValues } : item);
+              saveEntries();
+              render();
+              await Swal.fire({ icon: "success", title: "Updated", text: "Transaction updated on server.", timer: 1400, showConfirmButton: false });
+              return;
+            }
+          } catch (error) {
+            console.log('API error, using local fallback');
+          }
+        }
+
+        // Fallback to localStorage
+        entries = entries.map(item => item.id === id ? { ...item, ...formValues } : item);
+        saveEntries();
+        render();
+
+        await Swal.fire({ icon: "success", title: "Updated", text: isServerOnline ? "Transaction updated successfully." : "Transaction updated locally.", timer: 1400, showConfirmButton: false });
+      }
+    });
+
+    document.getElementById("filterToolbar").addEventListener("click", async (e) => {
+      const btn = e.target.closest(".filter-btn");
+      if (!btn) return;
+      const selectedFilter = btn.getAttribute("data-filter");
+
+      if (selectedFilter === "weekly") {
+        const { value } = await Swal.fire({
+          title: "Select Weekly Start Date",
+          input: "date",
+          inputLabel: "Week will cover exactly 7 days",
+          showCancelButton: true,
+          confirmButtonText: "Apply"
+        });
+        if (!value) return;
+        weeklyStartDate = value;
+      }
+
+      if (selectedFilter === "monthly") {
+        const { value } = await Swal.fire({
+          title: "Select Month and Year",
+          html: `
+            <div style="display:grid;gap:12px;text-align:left;padding:8px 6px 2px;">
+              <div>
+                <label style="display:block;font-size:12px;color:#6b7280;font-weight:600;margin-bottom:6px;">Month</label>
+                <select id="swalMonth" style="width:100%;height:40px;padding:0 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff;">
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+              </div>
+              <div>
+                <label style="display:block;font-size:12px;color:#6b7280;font-weight:600;margin-bottom:6px;">Year</label>
+                <input id="swalMonthYear" type="number" min="1900" max="3000" value="${new Date().getFullYear()}" style="width:100%;height:40px;padding:0 10px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;" />
+              </div>
+            </div>
+          `,
+          width: window.innerWidth < 480 ? "92%" : 420,
+          showCancelButton: true,
+          confirmButtonText: "Apply",
+          preConfirm: () => {
+            const month = document.getElementById("swalMonth").value;
+            const year = document.getElementById("swalMonthYear").value;
+            if (!month || !year) {
+              Swal.showValidationMessage("Month and year are required.");
+              return null;
+            }
+            return { month, year };
+          }
+        });
+
+        if (!value) return;
+        monthlyMonth = value.month;
+        monthlyYear = value.year;
+      }
+
+      if (selectedFilter === "yearly") {
+        const { value } = await Swal.fire({
+          title: "Select Year",
+          input: "number",
+          inputLabel: "Enter year (e.g. 2026)",
+          inputAttributes: { min: 1900, max: 3000, step: 1 },
+          inputValue: new Date().getFullYear(),
+          showCancelButton: true,
+          confirmButtonText: "Apply",
+          inputValidator: (v) => {
+            if (!v) return "Year is required.";
+            if (Number(v) < 1900 || Number(v) > 3000) return "Enter a valid year.";
+            return null;
+          }
+        });
+
+        if (!value) return;
+        yearlyYear = value;
+      }
+
+      if (selectedFilter === "daily" || selectedFilter === "all") {
+        weeklyStartDate = "";
+        monthlyMonth = "";
+        monthlyYear = "";
+        yearlyYear = "";
+      }
+
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      activeFilter = selectedFilter;
+      render();
+    });
+
+    btnApplyDateRange.addEventListener("click", async () => {
+      const from = dateFromInput.value;
+      const to = dateToInput.value;
+
+      if (from && to && from > to) {
+        await Swal.fire({ icon: "warning", title: "Invalid Range", text: "Date From cannot be later than Date To." });
+        return;
+      }
+
+      dateRangeFrom = from;
+      dateRangeTo = to;
+      render();
+
+      await Swal.fire({ icon: "success", title: "Date Range Applied", timer: 1100, showConfirmButton: false });
+    });
+
+    btnResetDateRange.addEventListener("click", async () => {
+      dateRangeFrom = "";
+      dateRangeTo = "";
+      dateFromInput.value = "";
+      dateToInput.value = "";
+      render();
+
+      await Swal.fire({ icon: "success", title: "Date Range Reset", timer: 1100, showConfirmButton: false });
+    });
+
+    document.getElementById("btnLogout").addEventListener("click", async () => {
+      const result = await Swal.fire({
+        icon: "question",
+        title: "Logout?",
+        showCancelButton: true,
+        confirmButtonText: "Logout",
+        cancelButtonText: "Stay"
+      });
+
+      if (!result.isConfirmed) return;
+
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("username");
+localStorage.removeItem("loginTime");
+      window.location.href = "index.html";
+    });
+
+// Load entries from API or localStorage on init
+loadEntries();
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+    const topbarActions = document.querySelector(".topbar-actions");
+    
+    if (mobileMenuBtn && topbarActions) {
+      mobileMenuBtn.addEventListener("click", function() {
+        mobileMenuBtn.classList.toggle("active");
+        topbarActions.classList.toggle("open");
+      });
+      
+      // Close menu when clicking outside
+      document.addEventListener("click", function(e) {
+        if (!mobileMenuBtn.contains(e.target) && !topbarActions.contains(e.target)) {
+          mobileMenuBtn.classList.remove("active");
+          topbarActions.classList.remove("open");
+        }
+      });
+    }
+
+  </script>
+</body>
+</html>
