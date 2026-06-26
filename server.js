@@ -112,29 +112,37 @@ app.get('/api/entries', async (req, res) => {
 app.post('/api/entries', async (req, res) => {
     try {
         const { type, amount, category, description, date } = req.body;
-        
+
         const entryId = Date.now().toString();
-        
-        await pool.query(
-            `INSERT INTO entries (entry_id, type, amount, category, description, date, timestamp)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-            [entryId, type, parseFloat(amount), category, description || "", date, Date.now()]
+
+        const result = await pool.query(
+            `INSERT INTO entries
+            (entry_id, type, amount, category, description, date, timestamp)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING *`,
+            [
+                entryId,
+                type,
+                parseFloat(amount),
+                category,
+                description || "",
+                date,
+                Date.now()
+            ]
         );
-        
-        const newEntry = {
-            entry_id: entryId,
-            type,
-            amount: parseFloat(amount),
-            category,
-            description: description || "",
-            date,
-            timestamp: Date.now()
-        };
-        
-        res.json({ success: true, entry: newEntry, message: "Entry added successfully" });
+
+        res.json({
+            success: true,
+            entry: result.rows[0],
+            message: "Entry added successfully"
+        });
+
     } catch (error) {
         console.error('Add entry error:', error);
-        res.status(500).json({ success: false, message: "Error adding entry" });
+        res.status(500).json({
+            success: false,
+            message: "Error adding entry"
+        });
     }
 });
 
