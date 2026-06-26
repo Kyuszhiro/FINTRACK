@@ -812,7 +812,7 @@ form.addEventListener("submit", async (e) => {
         return;
       }
 
-     const data = await response.json();
+      const newEntry = { entry_id: Date.now().toString(), type, amount, category, description, date };
 
       // Try API first, fallback to localStorage
       if (isServerOnline) {
@@ -823,6 +823,7 @@ form.addEventListener("submit", async (e) => {
             body: JSON.stringify({ type, amount, category, description, date })
           });
           if (response.ok) {
+            const data = await response.json();
             entries.push(newEntry);
             saveEntries();
             render();
