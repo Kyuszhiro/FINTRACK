@@ -196,9 +196,8 @@ app.get('/dashboard', (req, res) => {
 // Initialize and start server
 initDatabase().then(() => {
     app.listen(PORT, () => {
-        console.log(`Server running at http://localhost:${PORT}`);
-        console.log(`Dashboard at http://localhost:${PORT}/dashboard`);
-    });
+    console.log(`Server running on port ${PORT}`);
+});
 }).catch(err => {
     console.error('Failed to start server:', err);
     process.exit(1);
