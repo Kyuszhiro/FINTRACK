@@ -611,11 +611,21 @@ const STORAGE_KEY = "financeTrackerEntries";
     const API_URL = "https://fintrack-ry01.onrender.com";
     let entries = [];
     let isServerOnline = false;
+    let currentUser = localStorage.getItem("username") || "";
+
+    // Get user_id for API calls
+    function getUserId() {
+      return currentUser;
+    }
 
     // Check server status and load entries
     async function loadEntries() {
+      const userId = getUserId();
       try {
-        const response = await fetch(API_URL + '/api/entries', { method: 'GET' });
+        const response = await fetch(API_URL + '/api/entries?user_id=' + encodeURIComponent(userId), { 
+          method: 'GET',
+          headers: { 'x-user-id': userId }
+        });
         if (response.ok) {
           const data = await response.json();
           entries = data.entries || [];
@@ -626,7 +636,8 @@ const STORAGE_KEY = "financeTrackerEntries";
         }
       } catch (error) {
         console.log('API unavailable, loading from localStorage');
-        entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        const allEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        entries = allEntries.filter(e => e.user_id === currentUser);
         isServerOnline = false;
         updateServerStatus(false);
       }
@@ -812,7 +823,7 @@ form.addEventListener("submit", async (e) => {
         return;
       }
 
-      const newEntry = { entry_id: Date.now().toString(), type, amount, category, description, date };
+const newEntry = { entry_id: Date.now().toString(), user_id: currentUser, type, amount, category, description, date };
 
       // Try API first, fallback to localStorage
       if (isServerOnline) {
@@ -820,7 +831,7 @@ form.addEventListener("submit", async (e) => {
           const response = await fetch(API_URL + '/api/entries', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type, amount, category, description, date })
+            body: JSON.stringify({ user_id: currentUser, type, amount, category, description, date })
           });
           if (response.ok) {
             const data = await response.json();
@@ -839,7 +850,10 @@ form.addEventListener("submit", async (e) => {
         }
       }
 
-      // Fallback to localStorage
+      // Fallback to localStorage - save with user_id
+      const allEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      allEntries.push(newEntry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(allEntries));
       entries.push(newEntry);
       saveEntries();
       render();
@@ -864,12 +878,15 @@ if (target.classList.contains("btn-delete")) {
         });
         if (!result.isConfirmed) return;
 
-        // Try API first, fallback to localStorage
+// Try API first, fallback to localStorage
         if (isServerOnline) {
           try {
-            const response = await fetch(API_URL + '/api/entries/' + id, { method: 'DELETE' });
+            const response = await fetch(API_URL + '/api/entries/' + id + '?user_id=' + encodeURIComponent(currentUser), { 
+              method: 'DELETE',
+              headers: { 'x-user-id': currentUser }
+            });
             if (response.ok) {
-              entries = entries.filter(item => item.id !== id);
+              entries = entries.filter(item => item.entry_id !== id);
               saveEntries();
               render();
               await Swal.fire({ icon: "success", title: "Deleted", text: "Transaction removed from server.", timer: 1400, showConfirmButton: false });
@@ -947,12 +964,15 @@ if (!formValues) {
           return;
         }
 
-        // Try API first, fallback to localStorage
+// Try API first, fallback to localStorage
         if (isServerOnline) {
           try {
-            const response = await fetch(API_URL + '/api/entries/' + id, {
+            const response = await fetch(API_URL + '/api/entries/' + id + '?user_id=' + encodeURIComponent(currentUser), {
               method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 
+                'Content-Type': 'application/json',
+                'x-user-id': currentUser
+              },
               body: JSON.stringify(formValues)
             });
             if (response.ok) {
