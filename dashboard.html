@@ -751,9 +751,23 @@ const today = new Date();
       return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(value);
     }
 
-function saveEntries() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    }
+    function saveEntries() {
+  const allEntries =
+    JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+  const otherUsers =
+    allEntries.filter(
+      e => e.user_id !== currentUser
+    );
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify([
+      ...otherUsers,
+      ...entries
+    ])
+  );
+}
 
 function isInCurrentPeriod(dateStr, filter) {
       if (filter === "all") return true;
@@ -802,7 +816,10 @@ function getFilteredEntries() {
           if (!filterType) return true;
           return item.type === filterType;
         })
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
+        .sort((a, b) => {
+    return new Date(`${b.date}T${b.time || "00:00"}`) -
+           new Date(`${a.date}T${a.time || "00:00"}`);
+});
     }
 
     function renderSummary(filtered) {
@@ -890,13 +907,14 @@ const newEntry = { entry_id: Date.now().toString(), user_id: currentUser, type, 
           });
           if (response.ok) {
             const data = await response.json();
-            entries.push(newEntry);
+            entries.push(data.entry);
             saveEntries();
             render();
 inputAmount.value = "";
       populateCategoryOptions();
       inputDescription.value = "";
-      inputTime.value = "";
+      inputTime.value =
+      new Date().toTimeString().slice(0,5);
       inputAmount.focus();
 
       await Swal.fire({ icon: "success", title: "Entry Added", text: "Transaction added to server.", timer: 1500, showConfirmButton: false });
@@ -910,14 +928,15 @@ inputAmount.value = "";
       // Fallback to localStorage - save with user_id
       const allEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       allEntries.push(newEntry);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(allEntries));
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(allEntries));
       entries.push(newEntry);
-      saveEntries();
       render();
 
       inputAmount.value = "";
       populateCategoryOptions();
       inputDescription.value = "";
+      inputTime.value =
+  new Date().toTimeString().slice(0,5);
       inputAmount.focus();
 
       await Swal.fire({ icon: "success", title: "Entry Added", text: isServerOnline ? "Transaction added successfully." : "Transaction saved locally (offline).", timer: 1500, showConfirmButton: false });
@@ -1003,10 +1022,24 @@ if (target.classList.contains("btn-delete")) {
           didOpen: () => {
             const swalType = document.getElementById("swalType");
             const swalCategory = document.getElementById("swalCategory");
-            swalType.addEventListener("change", () => {
-              const options = getCategoryListByType(swalType.value);
-              swalCategory.innerHTML = options.map(c => `<option value="${c}">${c}</option>`).join("");
-            });
+            function updateCategories() {
+    const options =
+      swalType.value === "income"
+        ? incomeCategories
+        : expenseCategories;
+
+    swalCategory.innerHTML =
+      options.map(c =>
+        `<option value="${c}"
+          ${c === entry.category ? "selected" : ""}
+        >${c}</option>`
+      ).join("");
+  }
+
+  updateCategories();
+
+  swalType.addEventListener("change", updateCategories);
+},
           },
           preConfirm: () => {
             const updatedType = document.getElementById("swalType").value;
