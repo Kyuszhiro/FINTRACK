@@ -913,8 +913,7 @@ const newEntry = { entry_id: Date.now().toString(), user_id: currentUser, type, 
 inputAmount.value = "";
       populateCategoryOptions();
       inputDescription.value = "";
-      inputTime.value =
-      new Date().toTimeString().slice(0,5);
+inputTime.value = new Date().toTimeString().slice(0,5);
       inputAmount.focus();
 
       await Swal.fire({ icon: "success", title: "Entry Added", text: "Transaction added to server.", timer: 1500, showConfirmButton: false });
@@ -935,8 +934,7 @@ inputAmount.value = "";
       inputAmount.value = "";
       populateCategoryOptions();
       inputDescription.value = "";
-      inputTime.value =
-  new Date().toTimeString().slice(0,5);
+inputTime.value = new Date().toTimeString().slice(0,5);
       inputAmount.focus();
 
       await Swal.fire({ icon: "success", title: "Entry Added", text: isServerOnline ? "Transaction added successfully." : "Transaction saved locally (offline).", timer: 1500, showConfirmButton: false });
@@ -1018,28 +1016,17 @@ if (target.classList.contains("btn-delete")) {
           focusConfirm: false,
           showCancelButton: true,
           confirmButtonText: "Save Changes",
-          cancelButtonText: "Cancel",
+cancelButtonText: "Cancel",
           didOpen: () => {
             const swalType = document.getElementById("swalType");
             const swalCategory = document.getElementById("swalCategory");
             function updateCategories() {
-    const options =
-      swalType.value === "income"
-        ? incomeCategories
-        : expenseCategories;
+              const options = swalType.value === "income" ? incomeCategories : expenseCategories;
+              swalCategory.innerHTML = options.map(c => `<option value="${c}" ${c === entry.category ? "selected" : ""}>${c}</option>`).join("");
+            }
 
-    swalCategory.innerHTML =
-      options.map(c =>
-        `<option value="${c}"
-          ${c === entry.category ? "selected" : ""}
-        >${c}</option>`
-      ).join("");
-  }
-
-  updateCategories();
-
-  swalType.addEventListener("change", updateCategories);
-},
+            updateCategories();
+            swalType.addEventListener("change", updateCategories);
           },
           preConfirm: () => {
             const updatedType = document.getElementById("swalType").value;
