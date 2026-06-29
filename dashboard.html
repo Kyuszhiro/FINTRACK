@@ -384,6 +384,21 @@ th, td {
     .amount-income { color: #047857; font-weight: 700; }
     .amount-expense { color: #b91c1c; font-weight: 700; }
 
+    /* Prevent text wrapping for single-line display */
+    td:nth-child(1), td:nth-child(2), td:nth-child(6),
+    th:nth-child(1), th:nth-child(2), th:nth-child(6) {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 120px;
+    }
+    
+    /* Allow amount column to be slightly wider */
+    td:nth-child(6), th:nth-child(6) {
+      max-width: 140px;
+    }
+
+    
 .action-buttons {
       display: flex;
       justify-content: center;
