@@ -50,6 +50,7 @@ async function initDatabase() {
                 category VARCHAR(255),
                 description TEXT,
                 date VARCHAR(50),
+                time VARCHAR(50),
                 timestamp BIGINT
             )
         `);
@@ -127,7 +128,7 @@ app.get('/api/entries', async (req, res) => {
 // Add new entry - includes user_id for unique per-user data
 app.post('/api/entries', async (req, res) => {
     try {
-        const { type, amount, category, description, date, user_id, } = req.body;
+        const { type, amount, category, description, date, time, user_id } = req.body;
 
         if (!user_id) {
             return res.status(400).json({ success: false, message: "User ID is required" });
@@ -137,8 +138,8 @@ app.post('/api/entries', async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO entries
-            (entry_id, user_id, type, amount, category, description, date, timestamp)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            (entry_id, user_id, type, amount, category, description, date, time, timestamp)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *`,
             [
                 entryId,
@@ -148,6 +149,7 @@ app.post('/api/entries', async (req, res) => {
                 category,
                 description || "",
                 date,
+                time,
                 Date.now()
             ]
         );
@@ -172,7 +174,7 @@ app.put('/api/entries/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const userId = req.query.user_id || req.headers['x-user-id'];
-        const { type, amount, category, description, date } = req.body;
+        const { type, amount, category, description, date, time } = req.body;
         
         if (!userId) {
             return res.status(400).json({ success: false, message: "User ID is required" });
@@ -180,10 +182,17 @@ app.put('/api/entries/:id', async (req, res) => {
         
         const result = await pool.query(
             `UPDATE entries 
-             SET type = $1, amount = $2, category = $3, description = $4, date = $5
-             WHERE entry_id = $6 AND user_id = $7
+            SET
+                type = $1,
+                amount = $2,
+                category = $3,
+                description = $4,
+                date = $5,
+                time = $6
+            WHERE entry_id = $7
+            AND user_id = $8
              RETURNING *`,
-            [type, parseFloat(amount), category, description || "", date, id, userId]
+            [type, parseFloat(amount), category, description || "", date, time, id, userId]
         );
         
         if (result.rows.length === 0) {
