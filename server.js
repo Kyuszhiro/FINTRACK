@@ -127,7 +127,7 @@ app.get('/api/entries', async (req, res) => {
 // Add new entry - includes user_id for unique per-user data
 app.post('/api/entries', async (req, res) => {
     try {
-        const { type, amount, category, description, date, user_id } = req.body;
+        const { type, amount, category, description, date, user_id, } = req.body;
 
         if (!user_id) {
             return res.status(400).json({ success: false, message: "User ID is required" });
@@ -220,22 +220,6 @@ app.delete('/api/entries/:id', async (req, res) => {
     } catch (error) {
         console.error('Delete entry error:', error);
         res.status(500).json({ success: false, message: "Error deleting entry" });
-    }
-});
-
-app.get('/api/test-db', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT NOW()');
-        res.json({
-            success: true,
-            now: result.rows[0]
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
     }
 });
 

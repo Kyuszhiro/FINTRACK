@@ -227,19 +227,37 @@
     }
 
 .date-range {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto auto;
-      gap: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       margin-bottom: 12px;
-      align-items: end;
+      align-items: flex-end;
+      justify-content: center;
     }
 
-    .date-range label {
-      text-align: center;
+    .date-range .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 140px;
+      flex: 1;
     }
 
-    .date-range > div {
-      text-align: center;
+    .date-range .filter-group label {
+      text-align: left;
+      margin-bottom: 0;
+    }
+
+    .date-range .filter-group input,
+    .date-range .filter-group select {
+      width: 100%;
+      min-width: 140px;
+    }
+
+    .date-range .btn-group {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
     }
 
     .filter-btn {
@@ -494,18 +512,13 @@ th, td {
     <main class="layout">
       <section class="card">
         <h2>Add Transaction</h2>
-        <form id="transactionForm" class="form-grid">
+<form id="transactionForm" class="form-grid">
           <div>
             <label for="entryType">Type</label>
             <select id="entryType" required>
               <option value="income">Income</option>
               <option value="expense">Expense</option>
             </select>
-          </div>
-
-          <div>
-            <label for="entryAmount">Amount</label>
-            <input id="entryAmount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
           </div>
 
           <div>
@@ -519,11 +532,21 @@ th, td {
           </div>
 
           <div>
+            <label for="entryAmount">Amount</label>
+            <input id="entryAmount" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+          </div>
+
+          <div>
             <label for="entryDate">Date</label>
             <input id="entryDate" type="date" required />
           </div>
 
-<div style="text-align: center;">
+          <div>
+            <label for="entryTime">Time</label>
+            <input id="entryTime" type="time" required />
+          </div>
+
+          <div style="text-align: center;">
             <button type="submit" class="btn">Add Entry</button>
           </div>
         </form>
@@ -555,7 +578,7 @@ th, td {
           </div>
         </div>
 
-        <div class="toolbar" id="filterToolbar">
+<div class="toolbar" id="filterToolbar">
           <button class="filter-btn active" data-filter="daily">Daily</button>
           <button class="filter-btn" data-filter="weekly">Weekly</button>
           <button class="filter-btn" data-filter="monthly">Monthly</button>
@@ -563,24 +586,34 @@ th, td {
           <button class="filter-btn" data-filter="all">All</button>
         </div>
 
-        <div class="date-range">
-          <div>
+<div class="date-range">
+          <div class="filter-group">
             <label for="dateFrom">Date From</label>
             <input type="date" id="dateFrom">
           </div>
-          <div>
+          <div class="filter-group">
             <label for="dateTo">Date To</label>
             <input type="date" id="dateTo">
           </div>
-          <button class="btn secondary" id="btnApplyDateRange" type="button">Apply Range</button>
-          <button class="btn secondary" id="btnResetDateRange" type="button">Reset Range</button>
+          <div class="filter-group">
+            <label for="filterType">Type</label>
+            <select id="filterType">
+              <option value="">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+<div class="btn-group">
+            <button class="btn secondary" id="btnResetDateRange" type="button">Reset Range</button>
+</div>
         </div>
 
         <div class="table-wrap">
           <table>
-            <thead>
+<thead>
               <tr>
                 <th>Date</th>
+                <th>Time</th>
                 <th>Type</th>
                 <th>Category</th>
                 <th>Description</th>
@@ -628,7 +661,10 @@ const STORAGE_KEY = "financeTrackerEntries";
         });
         if (response.ok) {
           const data = await response.json();
-          entries = data.entries || [];
+          entries = (data.entries || []).map(item => ({
+            ...item,
+            amount: Number(item.amount) || 0
+          }));
           isServerOnline = true;
           updateServerStatus(true);
         } else {
@@ -637,7 +673,12 @@ const STORAGE_KEY = "financeTrackerEntries";
       } catch (error) {
         console.log('API unavailable, loading from localStorage');
         const allEntries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-        entries = allEntries.filter(e => e.user_id === currentUser);
+        entries = allEntries
+          .filter(e => e.user_id === currentUser)
+          .map(item => ({
+            ...item,
+            amount: Number(item.amount) || 0
+          }));
         isServerOnline = false;
         updateServerStatus(false);
       }
@@ -656,26 +697,28 @@ const STORAGE_KEY = "financeTrackerEntries";
         }
       }
     }
-    let activeFilter = "daily";
+let activeFilter = "daily";
     let dateRangeFrom = "";
     let dateRangeTo = "";
+    let filterType = "";
     let weeklyStartDate = "";
     let monthlyMonth = "";
     let monthlyYear = "";
     let yearlyYear = "";
 
-    const form = document.getElementById("transactionForm");
+const form = document.getElementById("transactionForm");
     const inputType = document.getElementById("entryType");
     const inputAmount = document.getElementById("entryAmount");
     const inputCategory = document.getElementById("entryCategory");
     const inputDescription = document.getElementById("entryDescription");
     const inputDate = document.getElementById("entryDate");
+    const inputTime = document.getElementById("entryTime");
     const tableBody = document.getElementById("entriesTableBody");
     const emptyState = document.getElementById("emptyState");
 
-    const dateFromInput = document.getElementById("dateFrom");
+const dateFromInput = document.getElementById("dateFrom");
     const dateToInput = document.getElementById("dateTo");
-    const btnApplyDateRange = document.getElementById("btnApplyDateRange");
+    const filterTypeInput = document.getElementById("filterType");
     const btnResetDateRange = document.getElementById("btnResetDateRange");
 
     const totalIncomeEl = document.getElementById("totalIncome");
@@ -699,19 +742,20 @@ const STORAGE_KEY = "financeTrackerEntries";
       inputCategory.innerHTML = categories.map(c => `<option value="${c}" ${selectedValue === c ? "selected" : ""}>${c}</option>`).join("");
     }
 
-    const today = new Date();
+const today = new Date();
     inputDate.value = today.toISOString().slice(0, 10);
+    inputTime.value = today.toTimeString().slice(0, 5);
     populateCategoryOptions();
 
     function formatCurrency(value) {
       return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(value);
     }
 
-    function saveEntries() {
+function saveEntries() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
     }
 
-    function isInCurrentPeriod(dateStr, filter) {
+function isInCurrentPeriod(dateStr, filter) {
       if (filter === "all") return true;
       const date = new Date(dateStr + "T00:00:00");
       const now = new Date();
@@ -750,16 +794,24 @@ const STORAGE_KEY = "financeTrackerEntries";
       return true;
     }
 
-    function getFilteredEntries() {
+function getFilteredEntries() {
       return entries
         .filter(item => isInCurrentPeriod(item.date, activeFilter))
         .filter(item => isInCustomDateRange(item.date))
+        .filter(item => {
+          if (!filterType) return true;
+          return item.type === filterType;
+        })
         .sort((a, b) => new Date(b.date) - new Date(a.date));
     }
 
     function renderSummary(filtered) {
-      const totalIncome = filtered.filter(e => e.type === "income").reduce((sum, e) => sum + e.amount, 0);
-      const totalExpense = filtered.filter(e => e.type === "expense").reduce((sum, e) => sum + e.amount, 0);
+      const totalIncome = filtered
+        .filter(e => e.type === "income")
+        .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+      const totalExpense = filtered
+        .filter(e => e.type === "expense")
+        .reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
       const netBalance = totalIncome - totalExpense;
 
       totalIncomeEl.textContent = formatCurrency(totalIncome);
@@ -781,13 +833,15 @@ const STORAGE_KEY = "financeTrackerEntries";
         const amountClass = item.type === "income" ? "amount-income" : "amount-expense";
         const amountPrefix = item.type === "income" ? "+" : "-";
         const typeClass = item.type === "income" ? "type-income" : "type-expense";
+        const numericAmount = Number(item.amount) || 0;
 
-        tr.innerHTML = `
+tr.innerHTML = `
           <td>${item.date}</td>
+          <td>${item.time || "-"}</td>
           <td><span class="type-tag ${typeClass}">${item.type}</span></td>
           <td>${item.category}</td>
           <td>${item.description || "-"}</td>
-          <td class="${amountClass}">${amountPrefix}${formatCurrency(item.amount)}</td>
+          <td class="${amountClass}">${amountPrefix}${formatCurrency(numericAmount)}</td>
           <td>
             <div class="action-buttons">
               <button class="icon-btn btn-edit" data-id="${item.entry_id}" title="Edit">Edit</button>
@@ -817,13 +871,14 @@ form.addEventListener("submit", async (e) => {
       const category = inputCategory.value;
       const description = inputDescription.value.trim();
       const date = inputDate.value;
+      const time = inputTime.value;
 
       if (!amount || amount <= 0 || !category || !date) {
         await Swal.fire({ icon: "warning", title: "Invalid Input", text: "Please provide valid amount, category, and date." });
         return;
       }
 
-const newEntry = { entry_id: Date.now().toString(), user_id: currentUser, type, amount, category, description, date };
+const newEntry = { entry_id: Date.now().toString(), user_id: currentUser, type, amount, category, description, date, time };
 
       // Try API first, fallback to localStorage
       if (isServerOnline) {
@@ -831,19 +886,21 @@ const newEntry = { entry_id: Date.now().toString(), user_id: currentUser, type, 
           const response = await fetch(API_URL + '/api/entries', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: currentUser, type, amount, category, description, date })
+            body: JSON.stringify({ user_id: currentUser, type, amount, category, description, date, time })
           });
           if (response.ok) {
             const data = await response.json();
             entries.push(newEntry);
             saveEntries();
             render();
-            inputAmount.value = "";
-            populateCategoryOptions();
-            inputDescription.value = "";
-            inputAmount.focus();
-            await Swal.fire({ icon: "success", title: "Entry Added", text: "Transaction added to server.", timer: 1500, showConfirmButton: false });
-            return;
+inputAmount.value = "";
+      populateCategoryOptions();
+      inputDescription.value = "";
+      inputTime.value = "";
+      inputAmount.focus();
+
+      await Swal.fire({ icon: "success", title: "Entry Added", text: "Transaction added to server.", timer: 1500, showConfirmButton: false });
+      return;
           }
         } catch (error) {
           console.log('API error, using local fallback');
@@ -929,6 +986,14 @@ if (target.classList.contains("btn-delete")) {
               <input id="swalDescription" class="swal2-input" type="text" value="${entry.description || ""}" style="margin:0;" />
               <label style="font-size:12px;color:#6b7280;">Date</label>
               <input id="swalDate" class="swal2-input" type="date" value="${entry.date}" style="margin:0;" />
+              <label style="font-size:12px;color:#6b7280;">Time</label>
+<input
+    id="swalTime"
+    class="swal2-input"
+    type="time"
+    value="${entry.time || ''}"
+    style="margin:0;"
+/>
             </div>
           `,
           focusConfirm: false,
@@ -949,13 +1014,14 @@ if (target.classList.contains("btn-delete")) {
             const updatedCategory = document.getElementById("swalCategory").value;
             const updatedDescription = document.getElementById("swalDescription").value.trim();
             const updatedDate = document.getElementById("swalDate").value;
+            const updatedTime = document.getElementById("swalTime").value;
 
             if (!updatedAmount || updatedAmount <= 0 || !updatedCategory || !updatedDate) {
               Swal.showValidationMessage("Please fill valid amount, category, and date.");
               return null;
             }
 
-            return { type: updatedType, amount: updatedAmount, category: updatedCategory, description: updatedDescription, date: updatedDate };
+            return { type: updatedType, amount: updatedAmount, category: updatedCategory, description: updatedDescription, date: updatedDate, time: updatedTime};
           }
         });
 
@@ -1097,31 +1163,34 @@ if (!formValues) {
       activeFilter = selectedFilter;
       render();
     });
+btnResetDateRange.addEventListener("click", async () => {
 
-    btnApplyDateRange.addEventListener("click", async () => {
-      const from = dateFromInput.value;
-      const to = dateToInput.value;
-
-      if (from && to && from > to) {
-        await Swal.fire({ icon: "warning", title: "Invalid Range", text: "Date From cannot be later than Date To." });
-        return;
-      }
-
-      dateRangeFrom = from;
-      dateRangeTo = to;
-      render();
-
-      await Swal.fire({ icon: "success", title: "Date Range Applied", timer: 1100, showConfirmButton: false });
-    });
-
-    btnResetDateRange.addEventListener("click", async () => {
       dateRangeFrom = "";
       dateRangeTo = "";
+      filterType = "";
       dateFromInput.value = "";
       dateToInput.value = "";
+      filterTypeInput.value = "";
       render();
 
       await Swal.fire({ icon: "success", title: "Date Range Reset", timer: 1100, showConfirmButton: false });
+    });
+
+// Also filter by type when the dropdown changes
+    filterTypeInput.addEventListener("change", () => {
+      filterType = filterTypeInput.value;
+      render();
+    });
+
+    // Auto-filter when date inputs change
+    dateFromInput.addEventListener("change", () => {
+      dateRangeFrom = dateFromInput.value;
+      render();
+    });
+
+    dateToInput.addEventListener("change", () => {
+      dateRangeTo = dateToInput.value;
+      render();
     });
 
     document.getElementById("btnLogout").addEventListener("click", async () => {
