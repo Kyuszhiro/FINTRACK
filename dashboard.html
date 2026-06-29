@@ -552,6 +552,7 @@ th, td {
         </form>
 
         <p class="footer-note">
+          
         </p>
       </section>
 
@@ -727,7 +728,7 @@ const dateFromInput = document.getElementById("dateFrom");
 
     const incomeCategories = ["Salary", "Freelance", "Gift"];
     const expenseCategories = [
-      "Electric Bill", "Water Bill", "Internet Bill", "Groceries", "Food", "Parent Allowance","Church", "Fuel",
+      "Electric Bill", "Water Bill", "Internet Bill", "Groceries", "Parent Allowance", "Fuel",
       "Lifestyle Spending", "Wants", "Clothing", "Vehicle Maintenance / Upgrade",
       "Mobile Load", "Pets", "Gift", "Medical", "Loans", "Home Maintenance"
     ];
@@ -744,10 +745,52 @@ const dateFromInput = document.getElementById("dateFrom");
 const today = new Date();
     inputDate.value = today.toISOString().slice(0, 10);
     inputTime.value = today.toTimeString().slice(0, 5);
+    // Set display placeholder for formatted date (Sept. 6, 2026)
+    inputDate.placeholder = formatDateDisplay(today.toISOString().slice(0, 10));
+    inputTime.placeholder = convertTo12Hour(today.toTimeString().slice(0, 5));
     populateCategoryOptions();
 
-    function formatCurrency(value) {
+function formatCurrency(value) {
       return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(value);
+    }
+
+    // Format date as "Sept. 6, 2026"
+    function formatDateDisplay(dateStr) {
+      if (!dateStr) return "-";
+      const date = new Date(dateStr + "T00:00:00");
+      const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "June", "July", "Aug.", "Sept.", "Oct.", "Nov.", "Dec."];
+      return months[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
+    }
+
+    // Format time as "12:30 PM" (12hr format)
+    function formatTimeDisplay(timeStr) {
+      if (!timeStr) return "-";
+      const [hours, minutes] = timeStr.split(":");
+      const h = parseInt(hours, 10);
+      const ampm = h >= 12 ? "PM" : "AM";
+      const h12 = h % 12 || 12;
+      return h12 + ":" + minutes + " " + ampm;
+    }
+
+    // Convert 12hr time to 24hr for storage/input
+    function convertTo24Hour(time12hr) {
+      if (!time12hr) return "";
+      const [time, modifier] = time12hr.split(" ");
+      let [hours, minutes] = time.split(":");
+      hours = parseInt(hours, 10);
+      if (modifier === "PM" && hours !== 12) hours += 12;
+      if (modifier === "AM" && hours === 12) hours = 0;
+      return hours.toString().padStart(2, "0") + ":" + minutes;
+    }
+
+    // Convert 24hr time to 12hr for display
+    function convertTo12Hour(time24) {
+      if (!time24) return "";
+      const [hours, minutes] = time24.split(":");
+      const h = parseInt(hours, 10);
+      const ampm = h >= 12 ? "PM" : "AM";
+      const h12 = h % 12 || 12;
+      return h12 + ":" + minutes + " " + ampm;
     }
 
     function saveEntries() {
@@ -852,8 +895,8 @@ function getFilteredEntries() {
         const numericAmount = Number(item.amount) || 0;
 
 tr.innerHTML = `
-          <td>${item.date}</td>
-          <td>${item.time || "-"}</td>
+          <td>${formatDateDisplay(item.date)}</td>
+          <td>${convertTo12Hour(item.time) || "-"}</td>
           <td><span class="type-tag ${typeClass}">${item.type}</span></td>
           <td>${item.category}</td>
           <td>${item.description || "-"}</td>
