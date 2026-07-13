@@ -333,7 +333,7 @@
           localStorage.setItem("loginTime", Date.now().toString());
           localStorage.setItem("useBackend", "true");
           
-          window.location.href = "dashboard.html";
+          window.location.href = "loading.html";
         } else {
           errorMsg.textContent = data.message || "Invalid username or password. Please try again.";
           errorMsg.classList.add("show");
@@ -352,7 +352,7 @@
           localStorage.setItem("loginTime", Date.now().toString());
           localStorage.setItem("useBackend", "false");
           
-          window.location.href = "dashboard.html";
+          window.location.href = "loading.html";
         } else {
           errorMsg.classList.add("show");
         }
@@ -366,7 +366,7 @@
     document.getElementById("password").addEventListener("input", () => errorMsg.classList.remove("show"));
 
     if (localStorage.getItem("isLoggedIn") === "true") {
-      window.location.href = "dashboard.html";
+      window.location.href = "loading.html";
     }
 
     // Check server status on load
