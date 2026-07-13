@@ -1289,8 +1289,31 @@ localStorage.removeItem("loginTime");
       window.location.href = "index.html";
     });
 
-// Load entries from API or localStorage on init
-loadEntries();
+// Load entries from preloaded sessionStorage first, fallback to API/localStorage
+(function initEntries() {
+  const preloadedRaw = sessionStorage.getItem("preloadedEntries");
+  if (preloadedRaw) {
+    try {
+      const preloaded = JSON.parse(preloadedRaw);
+      entries = (preloaded || []).map(item => ({
+        ...item,
+        amount: Number(item.amount) || 0
+      }));
+
+      const source = sessionStorage.getItem("preloadedEntriesSource");
+      updateServerStatus(source === "backend");
+      render();
+    } catch (error) {
+      loadEntries();
+    } finally {
+      sessionStorage.removeItem("preloadedEntries");
+      sessionStorage.removeItem("preloadedEntriesSource");
+    }
+  } else {
+    loadEntries();
+  }
+})();
+
 
     // Mobile menu toggle
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
