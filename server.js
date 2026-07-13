@@ -241,6 +241,11 @@ app.get('/dashboard', (req, res) => {
     res.sendFile(__dirname + '/dashboard.html');
 });
 
+app.get('/loading', (req, res) => {
+    res.sendFile(__dirname + '/loading.html');
+});
+
+
 // Initialize and start server
 initDatabase().then(() => {
     app.listen(PORT, () => {
