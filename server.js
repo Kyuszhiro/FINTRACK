@@ -74,9 +74,9 @@ async function initDatabase() {
             console.log('Default user created');
         }
 
-        console.log('Database initialized successfully');
+        console.log('Database ialized successfully');
     } catch (error) {
-        console.error('Error initializing database:', error.message);
+        console.error('Error ializing database:', error.message);
     }
 }
 
@@ -246,12 +246,12 @@ app.get('/loading', (req, res) => {
 });
 
 
-// Initialize and start server
-initDatabase().then(() => {
-    app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-}).catch(err => {
-    console.error('Failed to start server:', err);
-    process.exit(1);
-});
+async function initDatabase() {
+    try {
+        // database initialization...
+        console.log('Database initialized successfully');
+    } catch (error) {
+        console.error('Error initializing database:', error);
+        throw error;
+    }
+}
