@@ -74,9 +74,9 @@ async function initDatabase() {
             console.log('Default user created');
         }
 
-        console.log('Database ialized successfully');
+        console.log('Database initialized successfully');
     } catch (error) {
-        console.error('Error ializing database:', error.message);
+        console.error('Error initializing database:', error.message);
     }
 }
 
@@ -246,32 +246,12 @@ app.get('/loading', (req, res) => {
 });
 
 
-async function initDatabase() {
-    try {
-        // database initialization...
-        console.log('Database initialized successfully');
-    } catch (error) {
-        console.error('Error initializing database:', error);
-        throw error;
-    }
-}
-
-app.get('/api/health', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT NOW()');
-
-        res.json({
-            success: true,
-            database: 'connected',
-            time: result.rows[0].now
-        });
-    } catch (error) {
-        console.error('Database health check failed:', error);
-
-        res.status(500).json({
-            success: false,
-            database: 'disconnected',
-            error: error.message
-        });
-    }
+// Initialize and start server
+initDatabase().then(() => {
+    app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+}).catch(err => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
 });
