@@ -255,3 +255,23 @@ async function initDatabase() {
         throw error;
     }
 }
+
+app.get('/api/health', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT NOW()');
+
+        res.json({
+            success: true,
+            database: 'connected',
+            time: result.rows[0].now
+        });
+    } catch (error) {
+        console.error('Database health check failed:', error);
+
+        res.status(500).json({
+            success: false,
+            database: 'disconnected',
+            error: error.message
+        });
+    }
+});
